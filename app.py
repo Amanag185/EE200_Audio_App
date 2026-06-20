@@ -113,10 +113,16 @@ def match_query(query_hashes, db_hashes):
 st.set_page_config(page_title="EE200: Audio Fingerprinting", layout="wide")
 st.title("🎵 EE200: Audio Fingerprinting (Zapptain America)")
 
-# Build the database once when the app starts
-db_folder = "database"
-st.info("Indexing Database... (This takes a moment on startup)")
-db_hashes, global_fs = build_database(db_folder)
+import pickle
+
+st.info("Loading Fast Database...")
+
+@st.cache_resource(show_spinner=False)
+def load_fast_database():
+    with open('database_hashes.pkl', 'rb') as f:
+        return pickle.load(f)
+
+db_hashes, global_fs = load_fast_database()
 
 # TABS for UI
 tab1, tab2 = st.tabs(["🔍 Identify (Single-Clip Mode)", "📁 Batch Mode"])
