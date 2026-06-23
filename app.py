@@ -69,6 +69,9 @@ def build_database(database_folder="database"):
 # ==============================================================================
 # MATCHING LOGIC
 # ==============================================================================
+# ==============================================================================
+# MATCHING LOGIC
+# ==============================================================================
 def match_query(query_hashes, db_hashes):
     """Finds all matches and ranks them by their alignment spike."""
     matches = {} 
@@ -96,10 +99,12 @@ def match_query(query_hashes, db_hashes):
     # Sort by highest spike count (highest score first)
     scored_matches.sort(key=lambda x: x[1], reverse=True)
     
-    # Filter out pure noise (keep only things that got at least 5 hash matches)
-    valid_matches = [m for m in scored_matches if m[1] >= 5]
+    # If the absolute best match is less than 5, the whole clip is just noise
+    if not scored_matches or scored_matches[0][1] < 5:
+        return []
         
-    return valid_matches # Returns a list of: (song_name, max_count, offsets)
+    # Return the full list (winner + runner-ups) so the UI can draw the noise floors!
+    return scored_matches
 
 # ==============================================================================
 # STREAMLIT UI
