@@ -177,22 +177,22 @@ with tab1:
 
         
 
-        # 2. The Constellation
-        st.markdown("---")
-        st.subheader("STEP 2 • FEATURE EXTRACTION")
+                    # 2. The Constellation
+                    st.markdown("---")
+                    st.subheader("STEP 2 • FEATURE EXTRACTION")
         
-        fig_const, ax_const = plt.subplots(figsize=(10, 4))
-        fig_const.patch.set_facecolor('#0E1117')
-        ax_const.set_facecolor('#0E1117')
+                    fig_const, ax_const = plt.subplots(figsize=(10, 4))
+                    fig_const.patch.set_facecolor('#0E1117')
+                    ax_const.set_facecolor('#0E1117')
         
         # NOTE: Make sure 't_peaks' and 'f_peaks' match your variable names!
-        ax_const.scatter(t_peaks, f_peaks, c='#00FFFF', s=5, alpha=0.8)
-        ax_const.set_ylabel('Frequency (Hz)', color='gray')
-        ax_const.set_xlabel('time (s)', color='gray')
-        ax_const.tick_params(colors='gray')
-        ax_const.set_ylim(0, 5000)
+                    ax_const.scatter(t_peaks, f_peaks, c='#00FFFF', s=5, alpha=0.8)
+                    ax_const.set_ylabel('Frequency (Hz)', color='gray')
+                    ax_const.set_xlabel('time (s)', color='gray')
+                    ax_const.tick_params(colors='gray')
+                    ax_const.set_ylim(0, 5000)
         
-        st.pyplot(fig_const)
+                    st.pyplot(fig_const)
 
                 st.markdown("#### Step 1: Spectrogram & Constellation")
                 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 4))
