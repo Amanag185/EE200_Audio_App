@@ -65,5 +65,5 @@ If you want to run this application on your local machine and index your own raw
 
 ## 👥 Contributors
 
-* **Aman Agrawal** - *Developer & DSP Engineer* - [@Amanag185](https://github.com/Amanag185)
-* **Shorya Singh Rathore** - *Developer & DSP Engineer* - [@shorya-IITK](https://github.com/Shorya-IITK)
+* **Aman Agrawal** - [@Amanag185](https://github.com/Amanag185)
+* **Shorya Singh Rathore** - [@shorya-IITK](https://github.com/Shorya-IITK)
