@@ -157,7 +157,7 @@ with tab1:
                     st.markdown("---")
                     st.subheader("STEP 1 • FEATURE EXTRACTION")
                     st.markdown("### Spectrogram and Constellation")
-                    st.markdown("The clip is converted to a time-frequency map (left). Only the most prominent local maxima are kept to form the constellation (right).")
+                    st.markdown("The raw audio is distilled into a dense, time-frequency spectrogram (left). We then strip away the background noise, isolating only the brightest acoustic stars to map a pristine, noise-proof constellation (right).")
                     
                     col1, col2 = st.columns(2)
                     
@@ -193,7 +193,7 @@ with tab1:
                     st.markdown("---")
                     st.subheader("STEP 2 • THE PROOF")
                     st.markdown("### The alignment spike")
-                    st.markdown("Every matched hash votes for a time offset. A genuine match makes them converge: **That spike cannot be a coincidence.**")
+                    st.markdown("Every matched hash casts a vote for its relative time offset. While random noise scatters into a flat, meaningless floor, a true match forces thousands of data points to converge instantly. That massive spike isn't a coincidence, it is the undeniable acoustic fingerprint.")
                     
                     fig_hist, ax_hist = plt.subplots(figsize=(10, 4))
                     fig_hist.patch.set_facecolor('#0E1117')
@@ -234,7 +234,7 @@ with tab1:
                     if len(valid_matches) > 1:
                         st.markdown("---")
                         st.markdown("#### Runner-Up Comparisons (False Positives)")
-                        st.markdown("Notice how incorrect songs just produce a flat noise floor of random chance matches, without a unified spike.")
+                        st.markdown("Observe the false positives below: they produce nothing but a chaotic, flat line of random coincidence. Without the true acoustic fingerprint, the data refuses to align, leaving only a scattered floor of meaningless background noise.")
                         
                         runner_ups = valid_matches[1:4]
                         cols = st.columns(len(runner_ups))
