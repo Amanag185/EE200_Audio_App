@@ -149,8 +149,7 @@ with tab1:
                 st.markdown("---")
                 if best_song:
                     st.success(f"### 🎉🎊 MATCH FOUND: **{best_song}**")
-                else:
-                    st.error("### ❌ NO MATCH FOUND in Database")
+                
                    
                     import matplotlib.pyplot as plt
                     st.markdown("---")
@@ -193,7 +192,8 @@ with tab1:
                     ax_const.set_ylim(0, 5000)
         
                     st.pyplot(fig_const)
-
+                else:
+                    st.error("### ❌ NO MATCH FOUND in Database")
                 st.markdown("#### Step 1: Spectrogram & Constellation")
                 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 4))
                 ax1.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma')
