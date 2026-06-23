@@ -52,6 +52,17 @@ If you want to run this application on your local machine and index your own raw
    ```bash
    git clone [https://github.com/Amanag185/EE200_Audio_App.git](https://github.com/Amanag185/EE200_Audio_App.git)
    cd EE200_Audio_App
+2. **Install the required dependencies:**
+   ```bash
+   pip install -r requirements.txt
+3. **Add your music:**
+   Create a new folder named *database* inside the project directory. Place your .mp3 or .wav files inside this folder.
+4. **Launch the application:**
+   ```bash
+   streamlit run app.py
+
+---
+
 ## 👥 Contributors
 
 * **Aman Agrawal** - *Developer & DSP Engineer* - [@Amanag185](https://github.com/Amanag185)
