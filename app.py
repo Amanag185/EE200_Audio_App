@@ -199,7 +199,23 @@ with tab1:
                     fig_hist.patch.set_facecolor('#0E1117')
                     ax_hist.set_facecolor('#0E1117')
                     
-                    ax_hist.hist(best_offsets, bins=100, color='#FFA500') 
+                    # Draw the histogram and save the math data (n = heights, bins = x-coordinates)
+                    n, bins, patches = ax_hist.hist(best_offsets, bins=100, color='#FFA500') 
+                    
+                    # Find the exact peak to point the arrow at
+                    max_height = int(n.max())
+                    peak_x = (bins[n.argmax()] + bins[n.argmax()+1]) / 2
+
+                    # Add the pointing arrow and dynamic text
+                    ax_hist.annotate(
+                        f'{max_height} hashes\nalign here', 
+                        xy=(peak_x, max_height), 
+                        xytext=(30, -30), # Shifts the text 30 pixels right and down from the peak
+                        textcoords='offset points',
+                        arrowprops=dict(color='#FFA500', arrowstyle='->', lw=1.5),
+                        color='#FFA500',
+                        fontsize=10
+                    )
                     ax_hist.set_xlabel("time offset (database frame - query frame)", color='gray')
                     ax_hist.set_ylabel("# hashes", color='gray')
                     ax_hist.tick_params(colors='gray')
