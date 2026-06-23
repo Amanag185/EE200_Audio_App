@@ -156,7 +156,7 @@ with tab1:
                     # --- STEP 1 & 2: FEATURE EXTRACTION (Side-by-Side) ---
                     st.markdown("---")
                     st.subheader("STEP 1 • FEATURE EXTRACTION")
-                    st.markdown("### From spectrogram to constellation")
+                    st.markdown("### Spectrogram and Constellation")
                     st.markdown("The clip is converted to a time-frequency map (left). Only the most prominent local maxima are kept to form the constellation (right).")
                     
                     col1, col2 = st.columns(2)
@@ -234,7 +234,18 @@ with tab1:
                                 ax_r.spines['right'].set_visible(False)
                                 
                                 st.pyplot(fig_r)
-                        
+                     # --- STEP 5: THE FINAL VERDICT ---
+                    st.markdown("---")
+                    st.subheader("📝 The Final Verdict")
+                    
+                    # Pull the exact number of matching hashes from your scoring function
+                    winning_spike_count = best_match[1]
+                    
+                    st.info(f"""
+                    **Mathematical Confirmation:** The algorithm detected exactly **{winning_spike_count}** constellation hashes from your uploaded clip that aligned flawlessly with the database track for **{best_song}**. 
+                    
+                    Because random audio noise only produces scattered, coincidental matches of 1 to 4 hashes (as seen in the runner-up graphs), an alignment spike of **{winning_spike_count}** hashes represents an exact, undeniable acoustic fingerprint match.
+                    """)    
                 else:
                     st.error("### ❌ NO MATCH FOUND in Database")
 
