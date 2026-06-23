@@ -130,7 +130,7 @@ tab1, tab2 = st.tabs(["🔍 Identify (Single-Clip Mode)", "📁 Batch Mode"])
 # --- TAB 1: SINGLE CLIP MODE ---
 with tab1:
     st.markdown("### Identify a single clip and view intermediate steps")
-   uploaded_file = st.file_uploader("Upload an audio clip", type=['mp3', 'wav', 'flac', 'ogg'])
+    uploaded_file = st.file_uploader("Upload an audio clip", type=['mp3', 'wav', 'flac', 'ogg'])
     
     if uploaded_file is not None:
         if st.button("Identify Song"):
