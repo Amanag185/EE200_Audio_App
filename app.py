@@ -206,7 +206,7 @@ with tab1:
                     st.pyplot(fig_hist)
 
                     # --- STEP 4: RUNNER-UPS (Failed Matches) ---
-                    if len(valid_matches) > 1:
+                    if len(valid_matches) > 0:
                         st.markdown("---")
                         st.markdown("#### Runner-Up Comparisons (False Positives)")
                         st.markdown("Notice how incorrect songs just produce a flat noise floor of random chance matches, without a unified spike.")
