@@ -4,6 +4,11 @@
 
 A professional, Shazam-style audio identification web application built with Python and Streamlit. This application takes a short, noisy audio clip and accurately identifies the original song by analyzing its acoustic fingerprint against a pre-indexed database.
 
+## Live Demo
+
+🚀 **Try the application here:**  
+[EE200 Audio App](https://ee200audioapp-c5ualwpzchsnqcm5hhffvs.streamlit.app/)
+
 ## ✨ Features
 
 * **Instant Cloud Matching:** Uses a pre-computed `.pkl` hash dictionary, allowing the app to bypass strict cloud memory limits and identify tracks in milliseconds without loading heavy raw audio files.
