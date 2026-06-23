@@ -280,13 +280,23 @@ with tab2:
             
             # Progress bar for batch mode
             progress_bar = st.progress(0)
+            
             for i, file in enumerate(batch_files):
+                # Use st.toast to show dynamic progress without taking up screen space!
+                st.toast(f"Processing {file.name}...") 
+                
                 audio, fs = librosa.load(file, sr=global_fs, mono=True)
                 _, _, _, f_idx, t_idx = extract_peaks(audio, fs)
                 query_hashes = generate_hashes(f_idx, t_idx)
                 
-                best_song, _ = match_query(query_hashes, db_hashes)
-                prediction = best_song if best_song else "None"
+                # --- THIS IS THE FIXED PART ---
+                valid_matches = match_query(query_hashes, db_hashes)
+                
+                if valid_matches:
+                    prediction = valid_matches[0][0] # Grabs the song name from the top match
+                else:
+                    prediction = "None"
+                # ------------------------------
                 
                 results.append({"filename": file.name, "prediction": prediction})
                 progress_bar.progress((i + 1) / len(batch_files))
