@@ -189,7 +189,7 @@ with tab1:
                         
                         st.pyplot(fig_const)
                     
-                    # --- STEP 3: THE PROOF (Winning Spike) ---
+                   # --- STEP 3: THE PROOF (Winning Spike) ---
                     st.markdown("---")
                     st.subheader("STEP 2 • THE PROOF")
                     st.markdown("### The alignment spike")
@@ -199,23 +199,27 @@ with tab1:
                     fig_hist.patch.set_facecolor('#0E1117')
                     ax_hist.set_facecolor('#0E1117')
                     
-                    # Draw the histogram and save the math data (n = heights, bins = x-coordinates)
+                    # Draw the histogram
                     n, bins, patches = ax_hist.hist(best_offsets, bins=100, color='#FFA500') 
                     
-                    # Find the exact peak to point the arrow at
-                    max_height = int(n.max())
+                    # 1. Get the VISUAL height for the arrow to point to
+                    visual_max_height = int(n.max())
                     peak_x = (bins[n.argmax()] + bins[n.argmax()+1]) / 2
+                    
+                    # 2. Get the ACTUAL algorithmic score for the text label
+                    actual_spike_count = best_match[1]
 
-                    # Add the pointing arrow and dynamic text
+                    # Add the pointing arrow using the true count
                     ax_hist.annotate(
-                        f'{max_height} hashes\nalign here', 
-                        xy=(peak_x, max_height), 
-                        xytext=(30, -30), # Shifts the text 30 pixels right and down from the peak
+                        f'{actual_spike_count} hashes\nalign here', 
+                        xy=(peak_x, visual_max_height), 
+                        xytext=(30, -30),
                         textcoords='offset points',
                         arrowprops=dict(color='#FFA500', arrowstyle='->', lw=1.5),
                         color='#FFA500',
                         fontsize=10
                     )
+                    
                     ax_hist.set_xlabel("time offset (database frame - query frame)", color='gray')
                     ax_hist.set_ylabel("# hashes", color='gray')
                     ax_hist.tick_params(colors='gray')
