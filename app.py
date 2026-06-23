@@ -128,9 +128,11 @@ db_hashes, global_fs = load_fast_database()
 tab1, tab2 = st.tabs(["🔍 Identify (Single-Clip Mode)", "📁 Batch Mode"])
 
 # --- TAB 1: SINGLE CLIP MODE ---
+# --- TAB 1: SINGLE CLIP MODE ---
 with tab1:
     st.markdown("### Identify a single clip and view intermediate steps")
     uploaded_file = st.file_uploader("Upload an audio clip", type=['mp3', 'wav', 'flac', 'ogg'])
+    st.caption("200MB per file • MP3, WAV, FLAC, OGG") # Re-added the clean subtext!
     
     if uploaded_file is not None:
         if st.button("Identify Song"):
@@ -149,21 +151,20 @@ with tab1:
                 st.markdown("---")
                 if best_song:
                     st.success(f"### 🎉🎊 MATCH FOUND: **{best_song}**")
-                
-                   
+                    
                     import matplotlib.pyplot as plt
+                    
+                    # --- STEP 1: THE PROOF ---
                     st.markdown("---")
                     st.subheader("STEP 1 • THE PROOF")
                     st.markdown("### The alignment spike")
-        
-       
+                    
                     fig_hist, ax_hist = plt.subplots(figsize=(10, 4))
                     fig_hist.patch.set_facecolor('#0E1117')
                     ax_hist.set_facecolor('#0E1117')
-        
-        # NOTE: Make sure 'offsets' is the actual name of your time-difference variable!
+                    
                     ax_hist.hist(offsets, bins=100, color='#FFA500') 
-        
+                    
                     ax_hist.set_xlabel("time offset (database frame - query frame)", color='gray')
                     ax_hist.set_ylabel("# hashes", color='gray')
                     ax_hist.tick_params(colors='gray')
@@ -171,47 +172,45 @@ with tab1:
                     ax_hist.spines['right'].set_visible(False)
                     ax_hist.spines['bottom'].set_color('gray')
                     ax_hist.spines['left'].set_color('gray')
-        
+                    
                     st.pyplot(fig_hist)
 
-        
-
-                    # 2. The Constellation
+                    # --- STEP 2: FEATURE EXTRACTION (Side-by-Side) ---
                     st.markdown("---")
                     st.subheader("STEP 2 • FEATURE EXTRACTION")
-        
-                    fig_const, ax_const = plt.subplots(figsize=(10, 4))
-                    fig_const.patch.set_facecolor('#0E1117')
-                    ax_const.set_facecolor('#0E1117')
-        
-        # NOTE: Make sure 't_peaks' and 'f_peaks' match your variable names!
-                    ax_const.scatter(t_peaks, f_peaks, c='#00FFFF', s=5, alpha=0.8)
-                    ax_const.set_ylabel('Frequency (Hz)', color='gray')
-                    ax_const.set_xlabel('time (s)', color='gray')
-                    ax_const.tick_params(colors='gray')
-                    ax_const.set_ylim(0, 5000)
-        
-                    st.pyplot(fig_const)
+                    st.markdown("### From spectrogram to constellation")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        fig_spec, ax_spec = plt.subplots(figsize=(5, 4))
+                        fig_spec.patch.set_facecolor('#0E1117')
+                        ax_spec.set_facecolor('#0E1117')
+                        
+                        ax_spec.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma')
+                        ax_spec.set_ylabel('Frequency (Hz)', color='gray')
+                        ax_spec.set_xlabel('time (s)', color='gray')
+                        ax_spec.tick_params(colors='gray')
+                        ax_spec.set_ylim(0, 5000)
+                        
+                        st.pyplot(fig_spec)
+
+                    with col2:
+                        fig_const, ax_const = plt.subplots(figsize=(5, 4))
+                        fig_const.patch.set_facecolor('#0E1117')
+                        ax_const.set_facecolor('#0E1117')
+                        
+                        # Corrected the peak array variables here!
+                        ax_const.scatter(t[t_idx], f[f_idx], c='#00FFFF', s=5, alpha=0.8)
+                        ax_const.set_ylabel('Frequency (Hz)', color='gray')
+                        ax_const.set_xlabel('time (s)', color='gray')
+                        ax_const.tick_params(colors='gray')
+                        ax_const.set_ylim(0, 5000)
+                        
+                        st.pyplot(fig_const)
+                        
                 else:
                     st.error("### ❌ NO MATCH FOUND in Database")
-                st.markdown("#### Step 1: Spectrogram & Constellation")
-                fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 4))
-                ax1.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma')
-                ax1.set_title("Query Spectrogram")
-                ax1.set_ylim(0, 5000)
-                
-                ax2.scatter(t[t_idx], f[f_idx], c='cyan', s=10)
-                ax2.set_facecolor('#1e1e1e')
-                ax2.set_title("Constellation Peaks")
-                ax2.set_ylim(0, 5000)
-                st.pyplot(fig1)
-
-                if offsets:
-                    st.markdown("#### Step 2: Hash Alignment (The Proof)")
-                    fig2, ax3 = plt.subplots(figsize=(10, 3))
-                    ax3.hist(offsets, bins=100, color='orange', edgecolor='black')
-                    ax3.set_title(f"Offset Histogram for {best_song}")
-                    st.pyplot(fig2)
 
 # --- TAB 2: BATCH MODE ---
 with tab2:
