@@ -70,8 +70,8 @@ def build_database(database_folder="database"):
 # MATCHING LOGIC
 # ==============================================================================
 def match_query(query_hashes, db_hashes):
-    """Finds the song with the highest alignment spike."""
-    matches = {} # Format: {song_name: [offset1, offset2, ...]}
+    """Finds all matches and ranks them by their alignment spike."""
+    matches = {} 
     
     for q_sig, t_query in query_hashes:
         if q_sig in db_hashes:
@@ -82,30 +82,24 @@ def match_query(query_hashes, db_hashes):
                 matches[song_name].append(offset)
                 
     if not matches:
-        return None, None
+        return []
 
-    # Find the song with the largest identical offset spike
-    best_song = None
-    best_spike_count = 0
-    best_offsets = []
-
+    # Score and rank all matches
+    scored_matches = []
     for song, offsets in matches.items():
-        # Round offsets to group slight variations
         rounded_offsets = np.round(offsets, decimals=1)
         if len(rounded_offsets) > 0:
-            # Count the most frequent offset
             counts = pd.Series(rounded_offsets).value_counts()
             max_count = counts.max()
-            if max_count > best_spike_count:
-                best_spike_count = max_count
-                best_song = song
-                best_offsets = offsets # Keep raw offsets for plotting
-                
-    # If the highest spike is less than 5, it's probably random noise, not a match
-    if best_spike_count < 5:
-        return None, None
+            scored_matches.append((song, max_count, offsets))
+            
+    # Sort by highest spike count (highest score first)
+    scored_matches.sort(key=lambda x: x[1], reverse=True)
+    
+    # Filter out pure noise (keep only things that got at least 5 hash matches)
+    valid_matches = [m for m in scored_matches if m[1] >= 5]
         
-    return best_song, best_offsets
+    return valid_matches # Returns a list of: (song_name, max_count, offsets)
 
 # ==============================================================================
 # STREAMLIT UI
@@ -128,86 +122,109 @@ db_hashes, global_fs = load_fast_database()
 tab1, tab2 = st.tabs(["🔍 Identify (Single-Clip Mode)", "📁 Batch Mode"])
 
 # --- TAB 1: SINGLE CLIP MODE ---
-# --- TAB 1: SINGLE CLIP MODE ---
 with tab1:
     st.markdown("### Identify a single clip and view intermediate steps")
     uploaded_file = st.file_uploader("Upload an audio clip", type=['mp3', 'wav', 'flac', 'ogg'])
-    st.caption("200MB per file • MP3, WAV, FLAC, OGG") # Re-added the clean subtext!
+    st.caption("200MB per file • MP3, WAV, FLAC, OGG")
     
     if uploaded_file is not None:
         if st.button("Identify Song"):
             with st.spinner("Analyzing audio physics..."):
-                # Load Query
                 audio, fs = librosa.load(uploaded_file, sr=global_fs, mono=True)
                 
-                # 1. Spectrogram & Peaks
                 f, t, Sxx_dB, f_idx, t_idx = extract_peaks(audio, fs)
                 query_hashes = generate_hashes(f_idx, t_idx)
                 
-                # 2. Match
-                best_song, offsets = match_query(query_hashes, db_hashes)
+                # Use our new upgraded matching function
+                valid_matches = match_query(query_hashes, db_hashes)
                 
-                # --- VISUALIZATION OUTPUT ---
                 st.markdown("---")
-                if best_song:
+                if valid_matches:
+                    # The top match is the first item in the list
+                    best_match = valid_matches[0]
+                    best_song = best_match[0]
+                    best_offsets = best_match[2]
+                    
                     st.success(f"### 🎉🎊 MATCH FOUND: **{best_song}**")
                     
                     import matplotlib.pyplot as plt
                     
-                    # --- STEP 1: THE PROOF ---
+                    # --- STEP 1: SPECTROGRAM ---
                     st.markdown("---")
-                    st.subheader("STEP 1 • THE PROOF")
-                    st.markdown("### The alignment spike")
+                    st.subheader("1 • Spectrogram")
+                    st.markdown("Bright = loud. Each column is one DFT window. A single DFT of the whole song loses all timing info.")
                     
-                    fig_hist, ax_hist = plt.subplots(figsize=(10, 4))
+                    fig_spec, ax_spec = plt.subplots(figsize=(12, 4))
+                    fig_spec.patch.set_facecolor('#0E1117')
+                    ax_spec.set_facecolor('#0E1117')
+                    
+                    c = ax_spec.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma')
+                    fig_spec.colorbar(c, ax=ax_spec, label='Power (dB)')
+                    ax_spec.set_ylabel('Frequency (Hz)', color='gray')
+                    ax_spec.set_xlabel('Time (s)', color='gray')
+                    ax_spec.tick_params(colors='gray')
+                    
+                    st.pyplot(fig_spec)
+
+                    # --- STEP 2: CONSTELLATION ---
+                    st.markdown("---")
+                    st.subheader("2 • Constellation of Peaks")
+                    st.markdown("Only loud local maxima survive – sparse and noise-robust.")
+                    
+                    fig_const, ax_const = plt.subplots(figsize=(12, 4))
+                    fig_const.patch.set_facecolor('#0E1117')
+                    ax_const.set_facecolor('#0E1117')
+                    
+                    # Plot the faded spectrogram underneath the dots just like the image!
+                    ax_const.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma', alpha=0.5)
+                    ax_const.scatter(t[t_idx], f[f_idx], c='#00FFFF', s=15, label="Constellation peaks")
+                    ax_const.legend(loc="upper right")
+                    
+                    ax_const.set_ylabel('Frequency (Hz)', color='gray')
+                    ax_const.set_xlabel('Time (s)', color='gray')
+                    ax_const.tick_params(colors='gray')
+                    
+                    st.pyplot(fig_const)
+                    
+                    # --- STEP 3: THE PROOF (Winning Spike) ---
+                    st.markdown("---")
+                    st.subheader("3 • The Proof (Alignment Spike)")
+                    st.markdown("Every matched hash votes for a time offset. A genuine match makes them converge. **That spike cannot be a coincidence.**")
+                    
+                    fig_hist, ax_hist = plt.subplots(figsize=(12, 4))
                     fig_hist.patch.set_facecolor('#0E1117')
                     ax_hist.set_facecolor('#0E1117')
                     
-                    ax_hist.hist(offsets, bins=100, color='#FFA500') 
-                    
-                    ax_hist.set_xlabel("time offset (database frame - query frame)", color='gray')
+                    ax_hist.hist(best_offsets, bins=100, color='#FFA500') 
+                    ax_hist.set_title(f"Winning Match: {best_song}", color='white')
+                    ax_hist.set_xlabel("Time offset (database frame - query frame)", color='gray')
                     ax_hist.set_ylabel("# hashes", color='gray')
                     ax_hist.tick_params(colors='gray')
-                    ax_hist.spines['top'].set_visible(False)
-                    ax_hist.spines['right'].set_visible(False)
-                    ax_hist.spines['bottom'].set_color('gray')
-                    ax_hist.spines['left'].set_color('gray')
                     
                     st.pyplot(fig_hist)
 
-                    # --- STEP 2: FEATURE EXTRACTION (Side-by-Side) ---
-                    st.markdown("---")
-                    st.subheader("STEP 2 • FEATURE EXTRACTION")
-                    st.markdown("### From spectrogram to constellation")
-                    
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        fig_spec, ax_spec = plt.subplots(figsize=(5, 4))
-                        fig_spec.patch.set_facecolor('#0E1117')
-                        ax_spec.set_facecolor('#0E1117')
+                    # --- STEP 4: RUNNER-UPS (Failed Matches) ---
+                    if len(valid_matches) > 1:
+                        st.markdown("#### Runner-Up Comparisons (False Positives)")
+                        st.markdown("Notice how incorrect songs just produce a flat noise floor of random chance matches, without a unified spike.")
                         
-                        ax_spec.pcolormesh(t, f, Sxx_dB, shading='gouraud', cmap='magma')
-                        ax_spec.set_ylabel('Frequency (Hz)', color='gray')
-                        ax_spec.set_xlabel('time (s)', color='gray')
-                        ax_spec.tick_params(colors='gray')
-                        ax_spec.set_ylim(0, 5000)
+                        # Show up to the next 3 closest matches side-by-side
+                        runner_ups = valid_matches[1:4]
+                        cols = st.columns(len(runner_ups))
                         
-                        st.pyplot(fig_spec)
-
-                    with col2:
-                        fig_const, ax_const = plt.subplots(figsize=(5, 4))
-                        fig_const.patch.set_facecolor('#0E1117')
-                        ax_const.set_facecolor('#0E1117')
-                        
-                        # Corrected the peak array variables here!
-                        ax_const.scatter(t[t_idx], f[f_idx], c='#00FFFF', s=5, alpha=0.8)
-                        ax_const.set_ylabel('Frequency (Hz)', color='gray')
-                        ax_const.set_xlabel('time (s)', color='gray')
-                        ax_const.tick_params(colors='gray')
-                        ax_const.set_ylim(0, 5000)
-                        
-                        st.pyplot(fig_const)
+                        for i, col in enumerate(cols):
+                            with col:
+                                r_song, r_count, r_offsets = runner_ups[i]
+                                
+                                fig_r, ax_r = plt.subplots(figsize=(4, 3))
+                                fig_r.patch.set_facecolor('#0E1117')
+                                ax_r.set_facecolor('#0E1117')
+                                
+                                ax_r.hist(r_offsets, bins=100, color='gray', alpha=0.7)
+                                ax_r.set_title(r_song, color='gray', fontsize=10)
+                                ax_r.tick_params(colors='gray', labelsize=8)
+                                
+                                st.pyplot(fig_r)
                         
                 else:
                     st.error("### ❌ NO MATCH FOUND in Database")
